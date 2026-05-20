@@ -139,7 +139,7 @@ GET /api/collections/
 
 ## 代码结构
 
-![image-20260520190103156](D:/colapp/Typora/typora_user_images/image-20260520190103156.png)
+![image-20260520190103156](img/image-20260520190103156.png)
 
 ## 关键文件说明
 
@@ -180,19 +180,19 @@ python test_api.py
 
 ## 运行展示
 
-![image-20260520190159865](D:/colapp/Typora/typora_user_images/image-20260520190159865.png)
+![image-20260520190159865](img/image-20260520190159865.png)
 
-单击网址打开网页
+**单击网址打开网页**
 
-点击生成摘要
+**点击生成摘要**
 
-![image-20260520190306952](D:/colapp/Typora/typora_user_images/image-20260520190306952.png)
+![image-20260520190306952](img/image-20260520190306952.png)
 
-自由提问
+**自由提问**
 
-![image-20260520190441351](D:/colapp/Typora/typora_user_images/image-20260520190441351.png)
+![image-20260520190441351](img/image-20260520190441351.png)
 
-![image-20260520190528603](D:/colapp/Typora/typora_user_images/image-20260520190528603.png)
+![image-20260520190528603](img/image-20260520190528603.png)
 
 ## AI 协作说明
 
@@ -226,3 +226,4 @@ python test_api.py
 5. PDF 文本提取时按页标注 `[第X页]`，便于后续引用定位
 
 **教训**: 前端声明的功能范围必须与后端实际实现一致，否则会导致"静默失败"— 用户以为文件上传成功了，但实际数据没有入库。
+
