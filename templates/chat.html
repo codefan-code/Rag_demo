@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能聊天助手</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .chat-container {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: #007bff;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: #e9ecef;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        .summary-message {
+            align-self: flex-start;
+            background-color: #d4edda;
+            color: #155724;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* 引用来源样式 */
+        .sources-container {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #aaa;
+        }
+
+        .sources-toggle {
+            cursor: pointer;
+            color: #007bff;
+            font-size: 13px;
+            user-select: none;
+        }
+
+        .sources-toggle:hover {
+            text-decoration: underline;
+        }
+
+        .sources-list {
+            display: none;
+            margin-top: 6px;
+            font-size: 12px;
+            color: #666;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .sources-list.visible {
+            display: block;
+        }
+
+        .source-item {
+            margin-bottom: 4px;
+            padding: 4px 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+
+        .source-item .ref-label {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            gap: 10px;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 20px;
+            outline: none;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        #user-input:focus {
+            border-color: #007bff;
+        }
+
+        #send-button, #add-document, #summary-button {
+            padding: 0 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        #summary-button {
+            background-color: #28a745;
+        }
+
+        #summary-button:hover {
+            background-color: #218838;
+        }
+
+        #send-button:hover, #add-document:hover {
+            background-color: #0056b3;
+        }
+
+        #send-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            padding: 12px 16px;
+            background-color: #e9ecef;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            color: #333;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin: 0 2px;
+            background-color: #6c757d;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-6px); }
+        }
+
+        .toolbar {
+            display: flex;
+            padding: 10px 15px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #collection-name {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>企业资料处理 Copilot</h1>
+    </div>
+
+    <div class="toolbar">
+        <select id="collection-name">
+            <option value=""> --- </option>
+        </select>
+        <button id="add-document">添加文档</button>
+        <button id="summary-button">生成摘要</button>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+            <div class="typing-indicator" id="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="输入消息..." autocomplete="off">
+            <button id="send-button">发送</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.getElementById('chat-messages');
+            const userInput = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
+            const typingIndicator = document.getElementById('typing-indicator');
+            const collectionName = document.getElementById('collection-name');
+            const addDocument = document.getElementById('add-document');
+            const summaryButton = document.getElementById('summary-button');
+
+            // 添加问答消息（含引用来源）
+            function addChatMessage(answer, sources) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', 'bot-message');
+
+                // 答案文本
+                const answerDiv = document.createElement('div');
+                answerDiv.textContent = answer;
+                messageDiv.appendChild(answerDiv);
+
+                // 引用来源（可折叠）
+                if (sources && sources.length > 0) {
+                    const sourcesContainer = document.createElement('div');
+                    sourcesContainer.classList.add('sources-container');
+
+                    const toggle = document.createElement('span');
+                    toggle.classList.add('sources-toggle');
+                    toggle.textContent = '查看引用来源 (' + sources.length + '条)';
+                    toggle.addEventListener('click', function() {
+                        list.classList.toggle('visible');
+                        toggle.textContent = list.classList.contains('visible')
+                            ? '隐藏引用来源' : '查看引用来源 (' + sources.length + '条)';
+                    });
+
+                    const list = document.createElement('div');
+                    list.classList.add('sources-list');
+                    sources.forEach(src => {
+                        const item = document.createElement('div');
+                        item.classList.add('source-item');
+                        item.innerHTML = '<span class="ref-label">[来源' + src.ref_id + ']</span> ' +
+                            '块索引:' + src.chunk_index + ' | 相似度:' + src.distance +
+                            '<br><i>' + src.content_preview + '</i>';
+                        list.appendChild(item);
+                    });
+
+                    sourcesContainer.appendChild(toggle);
+                    sourcesContainer.appendChild(list);
+                    messageDiv.appendChild(sourcesContainer);
+                }
+
+                typingIndicator.style.display = 'none';
+                chatMessages.insertBefore(messageDiv, typingIndicator);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // 添加摘要消息
+            function addSummaryMessage(summary) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', 'summary-message');
+
+                const label = document.createElement('div');
+                label.style.fontWeight = 'bold';
+                label.style.marginBottom = '6px';
+                label.textContent = '📄 文档结构化摘要';
+                messageDiv.appendChild(label);
+
+                const content = document.createElement('div');
+                content.textContent = summary;
+                messageDiv.appendChild(content);
+
+                typingIndicator.style.display = 'none';
+                chatMessages.insertBefore(messageDiv, typingIndicator);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // 添加用户消息
+            function addUserMessage(text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', 'user-message');
+                messageDiv.textContent = text;
+
+                typingIndicator.style.display = 'none';
+                chatMessages.insertBefore(messageDiv, typingIndicator);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function showTypingIndicator() {
+                typingIndicator.style.display = 'flex';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // 发送问答消息
+            function sendMessageToBackend(message) {
+                return new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.addEventListener('load', function() {
+                        if (xhr.status === 200) {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                resolve(data);
+                            } catch(e) {
+                                // 如果不是 JSON，可能是旧的纯文本格式
+                                resolve({answer: xhr.responseText, sources: []});
+                            }
+                        } else {
+                            reject(new Error('发送失败: ' + xhr.statusText));
+                        }
+                    });
+                    xhr.addEventListener('error', function() {
+                        reject(new Error('网络错误'));
+                    });
+                    xhr.open('POST', '/chat/', true);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.send(JSON.stringify({'message': message}));
+                });
+            }
+
+            // 请求摘要
+            function requestSummary() {
+                return new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.addEventListener('load', function() {
+                        if (xhr.status === 200) {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                resolve(data);
+                            } catch(e) {
+                                resolve({summary: xhr.responseText, collection_name: ''});
+                            }
+                        } else {
+                            reject(new Error('摘要请求失败'));
+                        }
+                    });
+                    xhr.addEventListener('error', function() {
+                        reject(new Error('网络错误'));
+                    });
+                    xhr.open('POST', '/summary/', true);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.send(JSON.stringify({}));
+                });
+            }
+
+            // 处理发送消息
+            async function handleSendMessage() {
+                const message = userInput.value.trim();
+                if (!message) return;
+
+                sendButton.disabled = true;
+                userInput.disabled = true;
+
+                addUserMessage(message);
+                userInput.value = '';
+                showTypingIndicator();
+
+                try {
+                    const data = await sendMessageToBackend(message);
+                    addChatMessage(data.answer || data, data.sources || []);
+                } catch (error) {
+                    addChatMessage("抱歉，出现了错误。请稍后再试。", []);
+                    console.error("发送消息失败:", error);
+                } finally {
+                    sendButton.disabled = false;
+                    userInput.disabled = false;
+                    userInput.focus();
+                }
+            }
+
+            // 处理生成摘要
+            async function handleSummary() {
+                summaryButton.disabled = true;
+                showTypingIndicator();
+
+                try {
+                    const data = await requestSummary();
+                    addSummaryMessage(data.summary);
+                } catch (error) {
+                    addSummaryMessage("摘要生成失败，请稍后再试。");
+                    console.error("摘要生成失败:", error);
+                } finally {
+                    summaryButton.disabled = false;
+                }
+            }
+
+            sendButton.addEventListener('click', handleSendMessage);
+            summaryButton.addEventListener('click', handleSummary);
+
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !sendButton.disabled) {
+                    handleSendMessage();
+                }
+            });
+
+            userInput.focus();
+
+            // 加载文档集合列表
+            load_collections();
+            function load_collections() {
+                fetch('/collection/', { method: 'GET' })
+                .then(response => response.json())
+                .then(data => {
+                    collectionName.innerHTML = '';
+                    for (const name of data.name_list) {
+                        const selected = name === data.collection_name ? ' selected' : '';
+                        collectionName.innerHTML += '<option value="' + name + '"' + selected + '>' + name + '</option>';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+
+            // 文档切换
+            collectionName.addEventListener('change', function() {
+                fetch('/collection/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ collection_name: this.value })
+                })
+                .then(response => response.json())
+                .then(data => console.log(data))
+                .catch(error => console.error('Error:', error));
+            });
+
+            // 添加文档按钮
+            addDocument.addEventListener('click', function() {
+                window.open("/document_upload/", "_self");
+            });
+        });
+    </script>
+</body>
+</html>
