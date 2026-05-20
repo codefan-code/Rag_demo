@@ -139,6 +139,24 @@ GET /api/collections/
 
 ## 代码结构
 
+项目根目录/
+├── app.py
+├── main.py
+├── function_tools.py
+├── logger_config.py
+├── models.py
+├── test_api.py
+├── requirements.txt
+├── uploads/           # 上传文件目录
+├── chroma/            # 向量数据库存储目录
+├── logs/              # 日志目录
+└── templates/         # HTML模板目录
+    ├── chat.html
+    ├── document_upload.html
+    └── summary.html
+
+**图示**
+
 ![image-20260520190103156](img/image-20260520190103156.png)
 
 ## 关键文件说明
