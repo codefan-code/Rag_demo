@@ -137,6 +137,10 @@ GET /api/collections/
 }
 ```
 
+## 代码结构
+
+![image-20260520190103156](D:/colapp/Typora/typora_user_images/image-20260520190103156.png)
+
 ## 关键文件说明
 
 | 文件 | 功能 | 说明 |
@@ -174,13 +178,31 @@ python test_api.py
 2. **结构化摘要生成** — 请求摘要，验证包含概述/要点/详细摘要
 3. **集合列表API** — 验证 API 返回正确的集合列表
 
+## 运行展示
+
+![image-20260520190159865](D:/colapp/Typora/typora_user_images/image-20260520190159865.png)
+
+单击网址打开网页
+
+点击生成摘要
+
+![image-20260520190306952](D:/colapp/Typora/typora_user_images/image-20260520190306952.png)
+
+自由提问
+
+![image-20260520190441351](D:/colapp/Typora/typora_user_images/image-20260520190441351.png)
+
+![image-20260520190528603](D:/colapp/Typora/typora_user_images/image-20260520190528603.png)
+
 ## AI 协作说明
+
+使用豆包等工具辅助拆解功能逻辑与实现
 
 本项目使用 Claude Code (Anthropic CLI) 作为 AI 协作工具，主要协作内容：
 
 1. **代码审查与补全** — AI 审查了原项目代码，发现缺失的引用来源、结构化摘要、日志集成、PDF支持等功能，并逐一补全
 2. **架构增强** — AI 协助设计了引用标注机制（为 ChromaDB 文档块添加 metadata，Prompt 中标注[来源X]），以及结构化摘要的 Prompt 设计
-3. **日志集成** — 原有 `logger_config.py` 定义了完整日志框架但完全未调用，AI 将其集成到所有关键流程中，替换了散落的 `print()` 调用
+3. **日志集成** —  `logger_config.py` 定义了完整日志框架
 4. **测试编写** — AI 根据功能需求编写了3个 API 测试样例，覆盖问答、摘要、集合列表三大功能
 5. **文档编写** — AI 编写了完整的 README、API 文档、关键文件说明
 
